@@ -1,0 +1,39 @@
+{
+  "pesos_sha256": "f3490f953b4ac2aa0205c206c151be8f2da281da99708713b182492a43c7751c",
+  "pesos_coinciden_con_los_revisados": true,
+  "ultralytics": "8.4.171",
+  "torch": "2.14.1+cpu",
+  "dispositivo": "cpu",
+  "metricas_en_este_equipo": {
+    "val": {
+      "precision": 0.8096354848667022,
+      "recall": 0.62134944612286,
+      "map50": 0.7298128208550075,
+      "map50_95": 0.4038352717695689,
+      "ms_por_imagen": {
+        "preprocess": 1.7,
+        "inference": 62.09,
+        "loss": 0.0,
+        "postprocess": 0.85
+      }
+    },
+    "test": {
+      "precision": 0.7959253443578255,
+      "recall": 0.5995975855130785,
+      "map50": 0.7110591450615368,
+      "map50_95": 0.3937943603595336,
+      "ms_por_imagen": {
+        "preprocess": 1.71,
+        "inference": 62.28,
+        "loss": 0.0,
+        "postprocess": 0.63
+      }
+    }
+  },
+  "metricas_guardadas_en_el_checkpoint_split_val_del_autor": {
+    "precision": 0.8113,
+    "recall": 0.6191,
+    "map50": 0.7302,
+    "map50_95": 0.404
+  }
+}
