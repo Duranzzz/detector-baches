@@ -85,3 +85,19 @@ worst = np.argsort(t)[:10]
 print("\nLos 10 pares test -> train mas parecidos (nombre en test, distancia):")
 for i in worst:
     print(f"  {files['test'][i].name}  d={int(t[i])}")
+
+# ---- duplicados exactos (mismo contenido byte a byte) ----
+import collections  # noqa: E402
+import hashlib  # noqa: E402
+
+por_contenido = collections.defaultdict(list)
+for s in ("train", "val", "test"):
+    for p in files[s]:
+        por_contenido[hashlib.sha256(p.read_bytes()).hexdigest()].append((s, p.name))
+grupos = [v for v in por_contenido.values() if len(v) > 1]
+dentro = sum(len(v) - 1 for v in grupos if len({s for s, _ in v}) == 1)
+cruzan = [v for v in grupos if len({s for s, _ in v}) > 1]
+print(f"\nDuplicados exactos: {len(grupos)} grupos; {dentro} copias sobrantes dentro de un mismo split; "
+      f"{len(cruzan)} grupos que cruzan splits")
+for v in cruzan:
+    print("  cruza splits:", v)
