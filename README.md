@@ -15,12 +15,14 @@ Equipo: Intel Core i7-1355U, 7.7 GB de RAM, Python 3.14.7, ultralytics 8.4.171, 
 |---|---|---|---|---|---|
 | val, guardado por el autor en el checkpoint | 720 | 0.811 | 0.619 | 0.730 | 0.404 |
 | **val, medido aquí** | 720 | 0.810 | 0.621 | 0.730 | 0.404 |
+| test, declarado en el README del autor (mismo commit) | 718 | 0.797 | 0.600 | 0.711 | 0.394 |
 | **test, medido aquí** | 718 | 0.796 | 0.600 | 0.711 | 0.394 |
 | test limpio (sin casi-duplicado en train) | 670 | 0.806 | 0.614 | 0.719 | 0.399 |
 | test con casi-duplicado en train | 48 | 0.696 | 0.601 | 0.680 | 0.366 |
 
 - **Fuga train → test:** 6.7% de test tiene un casi-duplicado en train (distancia dHash de 64 bits ≤ 8). El mAP no se infla por eso: el test limpio sale igual o ligeramente mejor. El subconjunto contaminado es pequeño (48 imágenes), su cifra es ruidosa.
-- **Velocidad:** ~62 ms por imagen en CPU durante la validación; 17.4 FPS promedio con la webcam y la ventana abierta (922 fotogramas).
+- **Velocidad:** ~62 ms por imagen en CPU durante la validación; 17.4 FPS promedio con la webcam y la ventana abierta (922 fotogramas). El autor declara 5.21 ms (~192 FPS) en una GPU NVIDIA RTX 4050: otro hardware, no comparable.
+- **Duplicados exactos (byte a byte):** 13 grupos; 11 copias sobrantes dentro de un mismo split y 2 grupos que cruzan train y test.
 - **Umbral de confianza en test** (IoU ≥ 0.5, medido en `umbrales.py`):
 
 | conf ≥ | Precisión | Recall | F1 |
