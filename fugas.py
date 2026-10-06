@@ -101,3 +101,21 @@ print(f"\nDuplicados exactos: {len(grupos)} grupos; {dentro} copias sobrantes de
       f"{len(cruzan)} grupos que cruzan splits")
 for v in cruzan:
     print("  cruza splits:", v)
+
+# ---- salida en JSON para el articulo ----
+import json  # noqa: E402
+
+resumen = {
+    "umbral_casi_duplicado": 8,
+    "vecino_mas_cercano_en_train": {
+        q: {"n": int(len(rows[q])), "d0": float(np.mean(rows[q] == 0)), "d_le4": float(np.mean(rows[q] <= 4)),
+            "d_le8": float(np.mean(rows[q] <= 8)), "mediana": float(np.median(rows[q]))}
+        for q in ("val", "test")
+    },
+    "train_contra_train_muestra": {"n": int(len(ref_d)), "d_le4": float(np.mean(ref_d <= 4)),
+                                   "d_le8": float(np.mean(ref_d <= 8)), "mediana": float(np.median(ref_d))},
+    "duplicados_exactos": {"grupos": len(grupos), "copias_dentro_de_un_split": int(dentro),
+                           "grupos_que_cruzan_splits": len(cruzan)},
+}
+(HERE / "resultados").mkdir(exist_ok=True)
+(HERE / "resultados" / "fugas.json").write_text(json.dumps(resumen, indent=2), encoding="utf-8")

@@ -1,0 +1,30 @@
+{
+  "umbral_casi_duplicado": 8,
+  "vecino_mas_cercano_en_train": {
+    "val": {
+      "n": 720,
+      "d0": 0.030555555555555555,
+      "d_le4": 0.04861111111111111,
+      "d_le8": 0.05694444444444444,
+      "mediana": 17.0
+    },
+    "test": {
+      "n": 718,
+      "d0": 0.033426183844011144,
+      "d_le4": 0.06267409470752089,
+      "d_le8": 0.06685236768802229,
+      "mediana": 17.0
+    }
+  },
+  "train_contra_train_muestra": {
+    "n": 500,
+    "d_le4": 0.092,
+    "d_le8": 0.114,
+    "mediana": 16.0
+  },
+  "duplicados_exactos": {
+    "grupos": 13,
+    "copias_dentro_de_un_split": 11,
+    "grupos_que_cruzan_splits": 2
+  }
+}

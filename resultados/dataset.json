@@ -1,0 +1,38 @@
+{
+  "train": {
+    "imagenes": 3281,
+    "cajas": 5353,
+    "etiquetas_vacias": 18,
+    "lineas_malformadas": 0,
+    "cajas_fuera_de_rango": 0,
+    "imagenes_sin_etiqueta": 0,
+    "etiquetas_sin_imagen": 0,
+    "clases": [
+      0
+    ]
+  },
+  "val": {
+    "imagenes": 720,
+    "cajas": 993,
+    "etiquetas_vacias": 2,
+    "lineas_malformadas": 0,
+    "cajas_fuera_de_rango": 0,
+    "imagenes_sin_etiqueta": 0,
+    "etiquetas_sin_imagen": 0,
+    "clases": [
+      0
+    ]
+  },
+  "test": {
+    "imagenes": 718,
+    "cajas": 994,
+    "etiquetas_vacias": 2,
+    "lineas_malformadas": 0,
+    "cajas_fuera_de_rango": 0,
+    "imagenes_sin_etiqueta": 0,
+    "etiquetas_sin_imagen": 0,
+    "clases": [
+      0
+    ]
+  }
+}
