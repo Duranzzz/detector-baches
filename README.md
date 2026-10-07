@@ -35,7 +35,7 @@ Equipo: Intel Core i7-1355U, 7.7 GB de RAM, Python 3.14.7, ultralytics 8.4.171, 
   0.35 da el mejor F1; 0.50 reduce las falsas alarmas a costa de perder casi la mitad de los baches.
 - **Seguridad de los pesos:** `picklescan` no encontró nada malicioso en `best.pt` (0 archivos infectados, 0 globals peligrosos; de `__builtin__` solo pide `set`). Es una revisión heurística, ver `resultados/picklescan.txt`.
 
-Detalle en [`resultados/`](resultados/) y en el artículo [`docs/`](docs/).
+Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene campos marcados en rojo por completar (facultad, carrera, fecha de envío, enlace del repositorio, palabras clave del Tesauro de la UNESCO).
 
 ## Cómo correrlo (Windows)
 
@@ -78,13 +78,16 @@ Teclas: `q`/ESC salir · `+`/`-` umbral ±0.05 · `1`/`2`/`3` umbral 0.25/0.35/0
 |---|---|
 | `modelo/best.pt` | Pesos (5.5 MB). SHA-256 `f3490f953b4ac2aa0205c206c151be8f2da281da99708713b182492a43c7751c` |
 | `verify.py` | Comprueba el hash y mide P, R, mAP50, mAP50-95 en val y test |
-| `fugas.py` | Distancia dHash de cada imagen de val/test a su vecino más cercano de train |
+| `auditar_dataset.py` | Conteos por split, etiquetas mal formadas, cajas fuera de rango, etiquetas vacías |
+| `fugas.py` | Distancia dHash de cada imagen de val/test a su vecino más cercano de train, y duplicados exactos |
 | `test_limpio.py` | Evalúa el test completo, el limpio y el contaminado |
 | `umbrales.py` | Precisión, recall y F1 por umbral de confianza |
 | `webcam.py` | Detección en vivo, sobre video o sobre una imagen |
 | `setup_y_correr.bat`, `abrir_camara.bat` | Instalación y atajo a la cámara |
-| `resultados/` | Salidas medidas: `metricas`, `test_limpio`, `umbrales`, `picklescan` |
-| `docs/` | Artículo en el formato de la Revista 3i, figuras y su código |
+| `resultados/` | Salidas medidas: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, `picklescan` |
+| `docs/articulo_deteccion_baches.docx` | Artículo (12 páginas) en el formato de la Revista 3i, con los resultados de este repo |
+| `docs/generar_articulo.py`, `docs/figuras.py` | Regeneran el artículo y sus figuras desde `resultados/*.json` (`docs/requirements-docs.txt`) |
+| `docs/FORMATO_REVISTA_3I.md` | Atributos de la plantilla (página, tipografía, secciones, reglas) leídos de su XML |
 
 ## Limitaciones (lo que no se verificó o no se puede afirmar)
 
