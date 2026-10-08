@@ -51,7 +51,21 @@ Tres documentos: manuscrito, carta de entendimiento y formulario de autoverifica
 ## Datos del autor
 - Nombre completo: Leonardo Duran Cuenca
 - Correo: leonardo.duran.c1@ucb.edu.bo (el que trae la plantilla)
-- ORCID: https://orcid.org/0009-0001-1608-5788
-- Facultad: **pendiente** (el usuario la dará cuando la sepa; dejar el campo marcado)
+- ORCID: https://orcid.org/0009-0001-1608-5788 (con el ícono ORCID iD y enlace azul)
+- Afiliación: Departamento de Ciencias Informáticas y Robótica, Universidad Católica Boliviana "San Pablo" (en lugar de "Facultad")
+- Carrera: Ingeniería en Inteligencia Artificial
+- Repositorio: https://github.com/Duranzzz/detector-baches
 - Fecha de envío ("Recibido"): **pendiente**
-- Aún sin confirmar: carrera/materia a mencionar, si hay financiamiento, y si la materia exige este formato de revista tal cual.
+- Experiencia en investigaciones (sección "Sobre el autor"): **pendiente**
+
+## Palabras clave (Tesauro de la UNESCO, verificadas el 2026-10-02 en vocabularies.unesco.org)
+| Español | Inglés | Concepto |
+|---|---|---|
+| Inteligencia artificial | Artificial intelligence | concept3052 |
+| Reconocimiento de formas | Pattern recognition | concept3054 |
+| Carretera | Roads | concept4696 |
+
+El tesauro solo tiene en, es, fr, ru y ar: las palabras clave en portugués son traducción propia (inteligência artificial, reconhecimento de padrões, rodovias).
+
+## Detalles de la portada que la plantilla trae y el documento reproduce
+Rótulo "Artículo científico" (Arial 16 pt negrita, azul 001F5F), ícono ORCID iD delante del enlace del ORCID, insignia CC BY (1.34 x 0.47 in) antes del texto de derechos de uso, y todos los enlaces con el estilo Hyperlink (azul 0000FF, subrayado; Ctrl + clic abre la página).

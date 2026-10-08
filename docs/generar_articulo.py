@@ -13,13 +13,15 @@ from pathlib import Path
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_BREAK
-from docx.oxml import parse_xml
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
+from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
+from docx.shared import Emu, Inches, Pt, RGBColor
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "resultados"
 FIG = ROOT / "docs" / "figuras"
+REC = ROOT / "docs" / "recursos"  # iconos ORCID iD y CC BY
 OUT = ROOT / "docs" / "articulo_deteccion_baches.docx"
 TEMPLATE = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT.parent / "Artículo Científico-Revista 3i formato.docx"
 if not TEMPLATE.exists():
@@ -52,11 +54,10 @@ body = doc.element.body
 for el in list(body):
     if el.tag != qn("w:sectPr"):
         body.remove(el)
-doc.core_properties.title = "Verificación reproducible de un detector de baches con inteligencia artificial"
+doc.core_properties.title = "Verificación reproducible de un detector de baches de carretera con inteligencia artificial"
 doc.core_properties.author = "Leonardo Duran Cuenca"
 doc.core_properties.subject = "Artículo en el formato de la Revista 3i"
 
-TOKEN = re.compile(r"(\*\*.+?\*\*|\*.+?\*)")
 RED = RGBColor(0xFF, 0x00, 0x00)
 
 
@@ -75,21 +76,69 @@ def add_run(p, text, bold=False, italic=False, size=12, color=None, font="Arial"
     return r
 
 
+def add_hyperlink(p, url, text, size=12, bold=False, italic=False):
+    """Hipervinculo externo (estilo Hyperlink de la plantilla: azul subrayado; Ctrl + clic abre la pagina)."""
+    rid = p.part.relate_to(url, RT.HYPERLINK, is_external=True)
+    h = OxmlElement("w:hyperlink")
+    h.set(qn("r:id"), rid)
+    h.set(qn("w:history"), "1")
+    r = OxmlElement("w:r")
+    rpr = OxmlElement("w:rPr")
+    rs = OxmlElement("w:rStyle")
+    rs.set(qn("w:val"), "Hyperlink")
+    rpr.append(rs)
+    rf = OxmlElement("w:rFonts")
+    for a_ in ("w:ascii", "w:hAnsi", "w:cs", "w:eastAsia"):
+        rf.set(qn(a_), "Arial")
+    rpr.append(rf)
+    if bold:
+        rpr.append(OxmlElement("w:b"))
+    if italic:
+        rpr.append(OxmlElement("w:i"))
+    col = OxmlElement("w:color")
+    col.set(qn("w:val"), "0000FF")
+    rpr.append(col)
+    for tag in ("w:sz", "w:szCs"):
+        e = OxmlElement(tag)
+        e.set(qn("w:val"), str(int(size * 2)))
+        rpr.append(e)
+    u = OxmlElement("w:u")
+    u.set(qn("w:val"), "single")
+    rpr.append(u)
+    r.append(rpr)
+    t = OxmlElement("w:t")
+    t.text = text
+    t.set(qn("xml:space"), "preserve")
+    r.append(t)
+    h.append(r)
+    p._p.append(h)
+
+
+LINK = re.compile(r"(\[\[.+?\]\]|\{\{.+?\|.+?\}\}|https?://[^\s,;)\]]+|\*\*.+?\*\*|\*.+?\*)")
+
+
 def add_marked(p, text, size=12, bold=False, italic=False, color=None):
-    """Texto con **negrita** y *cursiva*; [[texto]] = marcador rojo de pendiente."""
-    for part in re.split(r"(\[\[.+?\]\])", text):
-        if part.startswith("[[") and part.endswith("]]"):
-            add_run(p, part[2:-2], size=size, bold=bold, italic=italic, color=RED)
+    """Texto con **negrita**, *cursiva*, {{texto|url}} y URL sueltas como hipervinculos azules;
+    [[texto]] = marcador rojo de pendiente."""
+    for tok in LINK.split(text):
+        if not tok:
             continue
-        for tok in TOKEN.split(part):
-            if not tok:
-                continue
-            if tok.startswith("**"):
-                add_run(p, tok[2:-2], size=size, bold=True, italic=italic, color=color)
-            elif tok.startswith("*"):
-                add_run(p, tok[1:-1], size=size, bold=bold, italic=True, color=color)
-            else:
-                add_run(p, tok, size=size, bold=bold, italic=italic, color=color)
+        if tok.startswith("[[") and tok.endswith("]]"):
+            add_run(p, tok[2:-2], size=size, bold=bold, italic=italic, color=RED)
+        elif tok.startswith("{{") and tok.endswith("}}"):
+            t, u = tok[2:-2].split("|", 1)
+            add_hyperlink(p, u, t, size=size, bold=bold, italic=italic)
+        elif tok.startswith("http"):
+            url = tok.rstrip(".")
+            add_hyperlink(p, url, url, size=size, bold=bold, italic=italic)
+            if len(tok) > len(url):
+                add_run(p, tok[len(url):], size=size, bold=bold, italic=italic, color=color)
+        elif tok.startswith("**"):
+            add_run(p, tok[2:-2], size=size, bold=True, italic=italic, color=color)
+        elif tok.startswith("*"):
+            add_run(p, tok[1:-1], size=size, bold=bold, italic=True, color=color)
+        else:
+            add_run(p, tok, size=size, bold=bold, italic=italic, color=color)
 
 
 def para(text="", style="Body Text", align=WD_ALIGN_PARAGRAPH.JUSTIFY, before=3, after=6, line=1.5,
@@ -240,7 +289,7 @@ def referencia(partes):
     p.paragraph_format.left_indent = Inches(0.5)
     p.paragraph_format.first_line_indent = Inches(-0.5)
     for texto, cur in partes:
-        add_run(p, texto, italic=cur)
+        add_marked(p, texto, italic=cur)
     return p
 
 
@@ -258,26 +307,30 @@ tot_img = sum(DS[s]["imagenes"] for s in DS)
 tot_box = sum(DS[s]["cajas"] for s in DS)
 
 # ================================================================== PORTADA
-ES_TITULO = "Verificación reproducible de un detector de baches con inteligencia artificial"
-EN_TITULO = "Reproducible verification of a pothole detector using artificial intelligence"
-PT_TITULO = "Verificação reprodutível de um detector de buracos com inteligência artificial"
+ES_TITULO = "Verificación reproducible de un detector de baches de carretera con inteligencia artificial"
+EN_TITULO = "Reproducible verification of a road pothole detector using artificial intelligence"
+PT_TITULO = "Verificação reprodutível de um detector de buracos de rodovia com inteligência artificial"
 assert len(ES_TITULO.split()) <= 12
 
+para("Artículo científico", style="Title", align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=16,
+     before=0, after=4, line=1.0, color=RGBColor(0x00, 0x1F, 0x5F))
 para(ES_TITULO, align=WD_ALIGN_PARAGRAPH.CENTER, bold=True, size=14, before=8, after=6, line=1.15)
 para(EN_TITULO, align=WD_ALIGN_PARAGRAPH.CENTER, italic=True, before=6, after=0)
 para(PT_TITULO, align=WD_ALIGN_PARAGRAPH.CENTER, italic=True, before=6, after=10)
 
 para("**Leonardo Duran Cuenca**", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
-para("Facultad de [[por definir]]", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
+para("Departamento de Ciencias Informáticas y Robótica", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
 para("Universidad Católica Boliviana “San Pablo”", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
-para("https://orcid.org/0009-0001-1608-5788", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
+p_orcid = para(align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=0, line=1.15)
+p_orcid.add_run().add_picture(str(REC / "orcid-id.png"), width=Emu(191135))
+add_marked(p_orcid, " https://orcid.org/0009-0001-1608-5788")
 para("leonardo.duran.c1@ucb.edu.bo", align=WD_ALIGN_PARAGRAPH.CENTER, before=0, after=12, line=1.15)
 para("Recibido: [[fecha de envío por definir]]", align=WD_ALIGN_PARAGRAPH.LEFT, before=0, after=10, line=1.15)
 
 # ------------------------------------------------------------------ resumen / abstract / resumo
 RESUMEN = (
-    "El objetivo de la investigación fue verificar, mediante ejecución propia, un detector de baches YOLO11n de una sola "
-    "clase publicado por un tercero, en relación con la reproducibilidad de sus métricas, la calidad de su conjunto de "
+    "El objetivo de la investigación fue verificar, mediante ejecución propia, un detector de baches de carretera basado en "
+    "inteligencia artificial (YOLO11n, de una sola clase) publicado por un tercero, en relación con la reproducibilidad de sus métricas, la calidad de su conjunto de "
     "datos y su uso en un equipo sin GPU. Para ello se desarrolló una investigación con enfoque cuantitativo y diseño de "
     f"replicación, aplicada a {miles(tot_img)} imágenes; la recolección de datos se realizó ejecutando el modelo en CPU y "
     "registrando sus salidas, y el análisis se llevó a cabo con mAP, precisión, recall, F1 por umbral de confianza y un "
@@ -289,8 +342,8 @@ RESUMEN = (
     "procedencia del conjunto de datos y su desempeño con otras cámaras siguen sin verificarse."
 )
 ABSTRACT = (
-    "The objective of the research was to verify, through our own execution, a single-class YOLO11n pothole detector "
-    "published by a third party, in relation to the reproducibility of its metrics, the quality of its dataset, and its use "
+    "The objective of the research was to verify, through our own execution, a single-class YOLO11n road pothole detector "
+    "based on artificial intelligence and published by a third party, in relation to the reproducibility of its metrics, the quality of its dataset, and its use "
     "on a machine without a GPU. To this end, a study with a quantitative approach and a replication design was conducted, "
     f"applied to {tot_img:,} images; data collection was carried out by running the model on a CPU and recording its "
     "outputs, and analysis was performed through mAP, precision, recall, F1 by confidence threshold, and a perceptual hash "
@@ -302,8 +355,8 @@ ABSTRACT = (
     "its data, but the provenance of the dataset and the performance with other cameras remain unverified."
 )
 RESUMO = (
-    "O objetivo desta pesquisa foi verificar, por meio de execução própria, um detector de buracos YOLO11n de uma única "
-    "classe publicado por terceiros, em relação à reprodutibilidade de suas métricas, à qualidade de seu conjunto de dados "
+    "O objetivo desta pesquisa foi verificar, por meio de execução própria, um detector de buracos de rodovia baseado em "
+    "inteligência artificial (YOLO11n, de uma única classe) publicado por terceiros, em relação à reprodutibilidade de suas métricas, à qualidade de seu conjunto de dados "
     "e ao seu uso em um equipamento sem GPU. Para tanto, foi desenvolvida uma pesquisa com abordagem quantitativa e "
     f"delineamento de replicação, aplicada a {miles(tot_img)} imagens. A coleta de dados foi realizada executando o modelo "
     "em CPU e registrando suas saídas, e a análise foi conduzida por meio de mAP, precisão, recall, F1 por limiar de "
@@ -319,15 +372,13 @@ for nombre, txt in (("Resumen", RESUMEN), ("Abstract", ABSTRACT), ("Resumo", RES
 
 para("Resumen", align=WD_ALIGN_PARAGRAPH.LEFT, bold=True, before=6, after=2, line=1.0, keep_next=True)
 para(RESUMEN, left=0.5, before=2, after=6, line=1.15)
-para("**Palabras clave:** inteligencia artificial, reconocimiento de formas, baches. "
-     "[[Pendiente: confirmar los términos en el Tesauro de la UNESCO (en inglés se confirmaron “Artificial intelligence” y “Pattern recognition”) y elegir un tercero.]]",
-     left=0.5, right=0.08, before=2, after=14, line=1.15)
+para("**Palabras clave:** inteligencia artificial, reconocimiento de formas, carretera", left=0.5, right=0.08, before=2, after=14, line=1.15)
 heading("Abstract", align=WD_ALIGN_PARAGRAPH.LEFT)
 para(ABSTRACT, left=0.5, before=6, after=6, line=1.15)
-para("**Keywords:** artificial intelligence, pattern recognition, potholes", left=0.5, before=2, after=14, line=1.15)
+para("**Keywords:** artificial intelligence, pattern recognition, roads", left=0.5, before=2, after=14, line=1.15)
 para("Resumo", align=WD_ALIGN_PARAGRAPH.LEFT, bold=True, before=6, after=2, line=1.15, keep_next=True)
 para(RESUMO, left=0.5, before=2, after=6, line=1.15)
-para("**Palavras-chave:** inteligência artificial, reconhecimento de padrões, buracos", left=0.5, before=2, after=10, line=1.15)
+para("**Palavras-chave:** inteligência artificial, reconhecimento de padrões, rodovias", left=0.5, before=2, after=10, line=1.15)
 
 # ================================================================== INTRODUCCIÓN
 heading("Introducción")
@@ -345,7 +396,8 @@ para("Sin embargo, muchos modelos se publican con métricas autodeclaradas que n
      "en el conjunto de entrenamiento (Barz & Denzler, 2020). Por último, se han documentado modelos con código malicioso "
      "en repositorios públicos (Zhao et al., 2024), lo que obliga a revisar los archivos de pesos antes de cargarlos.")
 para("Este manuscrito es resultado de la materia de Inteligencia Artificial (cuarto semestre, primer parcial) de la carrera de "
-     "[[carrera por definir]], a nivel de licenciatura, en la Universidad Católica Boliviana “San Pablo”. El objetivo fue "
+     "Ingeniería en Inteligencia Artificial, a nivel de licenciatura, en el Departamento de Ciencias Informáticas y Robótica "
+     "de la Universidad Católica Boliviana “San Pablo”. El objetivo fue "
      "verificar, con ejecución propia, un detector de baches YOLO11n ya entrenado y publicado por un tercero (Bisman-Singh-Dev, "
      "2026): comprobar la integridad de sus pesos, reproducir sus métricas, medir la fuga de datos entre entrenamiento y "
      "prueba, elegir con datos un umbral de confianza y medir su velocidad en un equipo sin GPU. No se entrenó ningún modelo.")
@@ -354,7 +406,7 @@ para("Este manuscrito es resultado de la materia de Inteligencia Artificial (cua
 heading("Metodología")
 para("Se realizó un estudio cuantitativo de replicación: sobre un modelo y un conjunto de datos de un tercero se ejecutaron las "
      "evaluaciones que el autor declara y otras adicionales, y se compararon las cifras. El código y las salidas están en el "
-     "repositorio del proyecto [[enlace por definir]].")
+     "repositorio del proyecto (https://github.com/Duranzzz/detector-baches).")
 para(f"El modelo es un YOLO11n de una clase (*pothole*) con 2.582.347 parámetros una vez fusionadas sus capas y 6,4 GFLOPs, "
      "guardado en un archivo de 5.467.546 bytes cuyo SHA-256 es f3490f95…c7751c. El *checkpoint* registra ultralytics 8.4.108 "
      "y un entrenamiento de 15 épocas a 640 píxeles que partió de pesos anteriores del propio autor y no de COCO. "
@@ -544,9 +596,9 @@ for ref in sorted(REFS, key=lambda r: r[0][0].lower()):
 
 # ================================================================== CIERRE
 heading("Sobre el autor")
-para("Leonardo Duran Cuenca es estudiante de [[carrera por definir]] en la Universidad Católica Boliviana “San Pablo” y cursa "
-     "el cuarto semestre. Este manuscrito es su trabajo del primer parcial de la materia de Inteligencia Artificial. "
-     "[[Completar con formación y experiencia en investigación, si corresponde.]]")
+para("Leonardo Duran Cuenca es estudiante de Ingeniería en Inteligencia Artificial en el Departamento de Ciencias Informáticas "
+     "y Robótica de la Universidad Católica Boliviana “San Pablo” y cursa el cuarto semestre. Este manuscrito es su trabajo del "
+     "primer parcial de la materia de Inteligencia Artificial. [[Completar con su experiencia en investigaciones.]]")
 heading("Financiamiento de la investigación")
 para("Con recursos propios.")
 heading("Declaración de intereses")
@@ -555,7 +607,10 @@ heading("Declaración de consentimiento informado")
 para("El estudio se realizó respetando el Código de ética y buenas prácticas editoriales de publicación. No participaron terceros: "
      "las pruebas con cámara se hicieron solo con el rostro del autor y no se conservaron imágenes de la cámara.")
 heading("Derechos de uso")
-para("Copyright© 2026 por Leonardo Duran Cuenca. Este texto está protegido por la Licencia Creative Commons Atribución 4.0 Internacional.")
+p_cc = para(before=3, after=6)
+p_cc.add_run().add_picture(str(REC / "cc-by.png"), width=Emu(1227455))
+add_marked(p_cc, " Copyright© 2026 por Leonardo Duran Cuenca. Este texto está protegido por la "
+           "{{Licencia Creative Commons Atribución 4.0 Internacional|https://creativecommons.org/licenses/by/4.0/deed.es}}.")
 para("Usted es libre para compartir, copiar y redistribuir el material en cualquier medio o formato y adaptar el documento, remezclar, "
      "transformar y crear a partir del material para cualquier propósito, incluso comercialmente, siempre que cumpla la condición de "
      "atribución: usted debe reconocer el crédito de una obra de manera adecuada, proporcionar un enlace a la licencia, e indicar si se "
