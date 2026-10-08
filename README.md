@@ -3,7 +3,7 @@
 Verificación de un detector de baches ya entrenado (YOLO11n, una clase) y demo con webcam, video o imagen que corre en una laptop sin GPU.
 No entrenamos el modelo: tomamos los pesos publicados por un tercero, comprobamos que son los que dicen ser, **reproducimos sus métricas ejecutándolas**, medimos la fuga de datos entre train y test, y documentamos lo que no se pudo verificar.
 
-Proyecto del primer parcial de Inteligencia Artificial (4.º semestre, Universidad Católica Boliviana "San Pablo"). Autor: Leonardo Duran Cuenca.
+Proyecto del primer parcial de Inteligencia Artificial (4.º semestre, Ingeniería en Inteligencia Artificial, Departamento de Ciencias Informáticas y Robótica, Universidad Católica Boliviana "San Pablo"). Autor: Leonardo Duran Cuenca ([ORCID](https://orcid.org/0009-0001-1608-5788)).
 
 > **Origen del modelo y del dataset:** [Bisman-Singh-Dev/YOLO-Pothole-Detection-Model](https://github.com/Bisman-Singh-Dev/YOLO-Pothole-Detection-Model), fijado al commit `bd8238b0f87083a1cea658336307d15b54eb7500`. El repo del autor cambia seguido; este proyecto no modifica ni sustituye su trabajo.
 
@@ -35,13 +35,15 @@ Equipo: Intel Core i7-1355U, 7.7 GB de RAM, Python 3.14.7, ultralytics 8.4.171, 
   0.35 da el mejor F1; 0.50 reduce las falsas alarmas a costa de perder casi la mitad de los baches.
 - **Seguridad de los pesos:** `picklescan` no encontró nada malicioso en `best.pt` (0 archivos infectados, 0 globals peligrosos; de `__builtin__` solo pide `set`). Es una revisión heurística, ver `resultados/picklescan.txt`.
 
-Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene campos marcados en rojo por completar (facultad, carrera, fecha de envío, enlace del repositorio, palabras clave del Tesauro de la UNESCO).
+Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene dos campos marcados en rojo por completar: la fecha de envío y la experiencia en investigaciones del autor.
 
 ## Cómo correrlo (Windows)
 
 Necesitas Python 3.10 o superior (probado con 3.14), Git opcional, internet y ~2 GB libres.
 
 ```powershell
+git clone https://github.com/Duranzzz/detector-baches.git
+cd detector-baches
 .\setup_y_correr.bat        # descarga el dataset (~640 MB), crea .venv, instala ultralytics y verifica
 .\abrir_camara.bat          # abre la webcam
 ```
@@ -100,8 +102,9 @@ Teclas: `q`/ESC salir · `+`/`-` umbral ±0.05 · `1`/`2`/`3` umbral 0.25/0.35/0
 
 ## Licencias
 
-- Ultralytics es AGPL-3.0 y el checkpoint declara AGPL-3.0; el repo de origen declara MIT. La licencia de las imágenes del dataset no está documentada.
-- Este repo todavía no tiene archivo `LICENSE`; hay que elegir uno compatible con lo anterior (AGPL-3.0 es la opción más simple si se redistribuye `best.pt`).
+- **Código y pesos de este repo: AGPL-3.0** (archivo [`LICENSE`](LICENSE)). Se eligió porque Ultralytics y el checkpoint de `best.pt` declaran AGPL-3.0 y este repo redistribuye los pesos. Si el proyecto pasara a uso comercial, esto hay que revisarlo.
+- **Artículo (`docs/`): CC BY 4.0**, como indica la plantilla de la revista (https://creativecommons.org/licenses/by/4.0/deed.es).
+- El repo de origen del modelo y del dataset declara MIT; la licencia de las imágenes del dataset no está documentada, por eso no se incluyen aquí.
 
 ## Referencias
 
