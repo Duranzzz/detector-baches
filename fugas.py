@@ -114,6 +114,7 @@ resumen = {
     },
     "train_contra_train_muestra": {"n": int(len(ref_d)), "d_le4": float(np.mean(ref_d <= 4)),
                                    "d_le8": float(np.mean(ref_d <= 8)), "mediana": float(np.median(ref_d))},
+    "histograma_distancias": {q: np.bincount(rows[q], minlength=65).tolist() for q in ("val", "test")},
     "duplicados_exactos": {"grupos": len(grupos), "copias_dentro_de_un_split": int(dentro),
                            "grupos_que_cruzan_splits": len(cruzan)},
 }

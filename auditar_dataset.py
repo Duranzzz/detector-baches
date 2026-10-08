@@ -4,9 +4,12 @@ imagenes sin etiqueta, etiquetas sin imagen y archivos de etiqueta vacios.
 Uso (dentro del venv):  python auditar_dataset.py
 Escribe resultados/dataset.json.
 """
+import collections
 import json
 import sys
 from pathlib import Path
+
+import cv2
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -40,7 +43,12 @@ for split in ("train", "val", "test"):
             clases.add(c)
             if not (0 <= x <= 1 and 0 <= y <= 1 and 0 < w <= 1 and 0 < h <= 1):
                 fuera += 1
-    res[split] = {"imagenes": len(imgs), "cajas": cajas, "etiquetas_vacias": vacios,
+    tamanos = collections.Counter()
+    for p_ in (DS / "images" / split).iterdir():
+        if p_.suffix.lower() in EXT:
+            h_, w_ = cv2.imread(str(p_)).shape[:2]
+            tamanos[f"{w_}x{h_}"] += 1
+    res[split] = {"tamanos_imagen": dict(tamanos.most_common()), "imagenes": len(imgs), "cajas": cajas, "etiquetas_vacias": vacios,
                   "lineas_malformadas": malformadas, "cajas_fuera_de_rango": fuera,
                   "imagenes_sin_etiqueta": len(imgs - labs.keys()), "etiquetas_sin_imagen": len(labs.keys() - imgs),
                   "clases": sorted(clases)}
