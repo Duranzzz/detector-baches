@@ -1,7 +1,7 @@
 """Verifica el modelo: integridad de los pesos, metricas en val/test y ejemplos anotados.
 
 Uso (dentro del venv):  python verify.py
-Escribe todo en resultados/ (metricas.json, metricas.md, ejemplos/).
+Escribe todo en resultados/ (metricas.json, ejemplos/).
 """
 import hashlib
 import json
@@ -99,23 +99,11 @@ payload = {
 }
 (OUT / "metricas.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
-lines = [
-    "# Metricas del modelo (medidas en este equipo)\n",
-    f"- Pesos SHA-256: `{digest}` ({'coinciden' if digest == EXPECTED_SHA256 else 'NO coinciden'} con los revisados)",
-    f"- ultralytics {ultralytics.__version__}, torch {torch.__version__}, dispositivo {payload['dispositivo']}\n",
-    "| Split | Precision | Recall | mAP50 | mAP50-95 | ms/img (inferencia) |",
-    "|---|---|---|---|---|---|",
-]
-for split, r in results.items():
-    lines.append(f"| {split} | {r['precision']:.3f} | {r['recall']:.3f} | {r['map50']:.3f} | "
-                 f"{r['map50_95']:.3f} | {r['ms_por_imagen'].get('inference')} |")
 c = CHECKPOINT_METRICS
-lines += [
-    "",
-    f"Referencia, guardada por el autor dentro del checkpoint (val): P={c['precision']:.3f}, "
-    f"R={c['recall']:.3f}, mAP50={c['map50']:.3f}, mAP50-95={c['map50_95']:.3f}.",
-    "Las metricas se calculan con conf=0.001, el valor por defecto de ultralytics para validar. "
-    "Con la camara se usa un umbral mayor (0.35).",
-]
-(OUT / "metricas.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"Resumen en {OUT / 'metricas.md'}")
+print(f"\nEn este equipo ({payload['dispositivo']}), conf=0.001:")
+for split, r in results.items():
+    print(f"  {split:4s} P={r['precision']:.3f} R={r['recall']:.3f} mAP50={r['map50']:.3f} mAP50-95={r['map50_95']:.3f} "
+          f"({r['ms_por_imagen'].get('inference')} ms/img)")
+print(f"Guardado por el autor en el checkpoint (val): P={c['precision']:.3f} R={c['recall']:.3f} "
+      f"mAP50={c['map50']:.3f} mAP50-95={c['map50_95']:.3f}")
+print(f"Detalle en {OUT / 'metricas.json'}")

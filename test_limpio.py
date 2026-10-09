@@ -1,7 +1,7 @@
 """Fase 5a: evalua el modelo en el test "limpio" (sin casi-duplicado en train) y en el "contaminado".
 
 Casi-duplicado = distancia dHash de 64 bits <= 8 respecto a alguna imagen de train (mismo criterio que fugas.py).
-No reentrena nada. Escribe resultados/test_limpio.md y .json.
+No reentrena nada. Escribe resultados/test_limpio.json.
 Uso (dentro del venv):  python test_limpio.py
 """
 import json
@@ -81,17 +81,4 @@ for nombre, rutas in (("completo", f_test), ("limpio", limpias), ("contaminado",
           f"mAP50={r['map50']:.3f}  mAP50-95={r['map50_95']:.3f}")
 
 (OUT / "test_limpio.json").write_text(json.dumps({"umbral_dhash": UMBRAL, "resultados": res}, indent=2), encoding="utf-8")
-lines = [
-    "# Test completo vs test limpio (Fase 5a)\n",
-    f"Casi-duplicado = distancia dHash <= {UMBRAL} contra alguna imagen de train. Mismo modelo, sin reentrenar.\n",
-    "| Subconjunto de test | Imagenes | Precision | Recall | mAP50 | mAP50-95 |",
-    "|---|---|---|---|---|---|",
-]
-for nombre, r in res.items():
-    lines.append(f"| {nombre} | {r['imagenes']} | {r['precision']:.3f} | {r['recall']:.3f} | "
-                 f"{r['map50']:.3f} | {r['map50_95']:.3f} |")
-lines += ["", "Nota: 'contaminado' son las imagenes de test con un casi-duplicado en train; 'limpio' son las demas. "
-          "Si la fuga inflara el mAP, 'limpio' saldria claramente por debajo de 'completo'. "
-          "'contaminado' es un subconjunto chico (decenas de imagenes), asi que su cifra es ruidosa."]
-(OUT / "test_limpio.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"\nResumen en {OUT / 'test_limpio.md'}")
+print(f"\nDetalle en {OUT / 'test_limpio.json'}")

@@ -5,7 +5,7 @@ este script mide P y R justo en cada umbral. Una caja predicha es acierto (TP) s
 real aun no emparejada es >= 0.5 (emparejado voraz por confianza descendente); si no, es falso positivo.
 Una caja real sin emparejar es falso negativo.
 Uso (dentro del venv):  python umbrales.py [--split test]
-Escribe resultados/umbrales.md y .json.
+Escribe resultados/umbrales.json.
 """
 import argparse
 import json
@@ -92,13 +92,4 @@ for u in UMBRALES:
 
 (OUT / "umbrales.json").write_text(json.dumps({"split": args.split, "imagenes": len(files), "cajas_reales": total_gt,
                                                "iou_min": IOU_MIN, "umbrales": res}, indent=2), encoding="utf-8")
-lines = [
-    f"# Precision y recall por umbral de confianza (split {args.split}, IoU >= {IOU_MIN})\n",
-    f"{len(files)} imagenes, {total_gt} cajas reales. Mismo modelo, sin reentrenar.\n",
-    "| conf >= | TP | FP | FN | Precision | Recall | F1 |",
-    "|---|---|---|---|---|---|---|",
-]
-for u, r in res.items():
-    lines.append(f"| {u} | {r['TP']} | {r['FP']} | {r['FN']} | {r['precision']:.3f} | {r['recall']:.3f} | {r['f1']:.3f} |")
-(OUT / "umbrales.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-print(f"Resumen en {OUT / 'umbrales.md'}")
+print(f"Detalle en {OUT / 'umbrales.json'}")
