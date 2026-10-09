@@ -1,5 +1,0 @@
-# solo para regenerar figuras y el articulo (docs/figuras.py, docs/generar_articulo.py)
-python-docx
-matplotlib
-opencv-python
-numpy
