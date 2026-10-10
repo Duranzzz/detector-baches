@@ -35,7 +35,7 @@ Equipo: Intel Core i7-1355U, 7.7 GB de RAM, Python 3.14.7, ultralytics 8.4.171, 
   0.35 da el mejor F1; 0.50 reduce las falsas alarmas a costa de perder casi la mitad de los baches.
 - **Seguridad de los pesos:** `picklescan` no encontró nada malicioso en `best.pt` (0 archivos infectados, 0 globals peligrosos; de `__builtin__` solo pide `set`). Es una revisión heurística, ver `resultados/picklescan.txt`.
 
-Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene dos campos marcados en rojo por completar: la fecha de envío y la experiencia en investigaciones del autor.
+Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene un campo marcado en rojo por completar: la fecha de envío.
 
 ## Cómo correrlo (Windows)
 
@@ -55,7 +55,7 @@ Pasos a mano, desde esta carpeta:
 ```powershell
 py -3 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install ultralytics
-.\.venv\Scripts\python.exe verify.py          # SHA-256 de los pesos + métricas en val y test -> resultados\metricas.md
+.\.venv\Scripts\python.exe verify.py          # SHA-256 de los pesos + métricas en val y test -> resultados\metricas.json
 .\.venv\Scripts\python.exe fugas.py           # casi-duplicados train -> val/test
 .\.venv\Scripts\python.exe test_limpio.py     # test completo vs limpio vs contaminado
 .\.venv\Scripts\python.exe umbrales.py        # precisión/recall por umbral de confianza
@@ -86,10 +86,9 @@ Teclas: `q`/ESC salir · `+`/`-` umbral ±0.05 · `1`/`2`/`3` umbral 0.25/0.35/0
 | `umbrales.py` | Precisión, recall y F1 por umbral de confianza |
 | `webcam.py` | Detección en vivo, sobre video o sobre una imagen |
 | `setup_y_correr.bat`, `abrir_camara.bat` | Instalación y atajo a la cámara |
-| `resultados/` | Salidas medidas: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, `picklescan` |
+| `resultados/` | Salidas medidas en JSON: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, y `picklescan.txt` |
 | `docs/articulo_deteccion_baches.docx` | Artículo (12 páginas) en el formato de la Revista 3i, con los resultados de este repo |
-| `docs/generar_articulo.py`, `docs/figuras.py` | Regeneran el artículo y sus figuras desde `resultados/*.json` (`docs/requirements-docs.txt`) |
-| `docs/FORMATO_REVISTA_3I.md` | Atributos de la plantilla (página, tipografía, secciones, reglas) leídos de su XML |
+| `docs/datos_graficas.xlsx` | Datos de las tablas y gráfico editable de la figura 1 (la revista pide las gráficas en un Excel aparte) |
 
 ## Limitaciones (lo que no se verificó o no se puede afirmar)
 

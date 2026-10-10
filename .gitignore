@@ -10,9 +10,3 @@ resultados/capturas/
 resultados/val_*/
 resultados/*.yaml
 resultados/test_*.txt
-
-# notas internas de trabajo
-CONTEXTO_CLAUDE_CODE.md
-
-# paquete anterior, reemplazado por README.md
-LEEME.md
