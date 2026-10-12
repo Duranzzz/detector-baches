@@ -66,13 +66,26 @@ py -3 -m venv .venv
 ### Demo: webcam, video o imagen
 
 ```powershell
-.\.venv\Scripts\python.exe webcam.py                          # webcam 0
+.\.venv\Scripts\python.exe webcam.py                          # webcam 0 (la de la laptop)
+.\.venv\Scripts\python.exe webcam.py --source 1               # otra cámara, por ejemplo una USB
 .\.venv\Scripts\python.exe webcam.py --source video.mp4       # video
 .\.venv\Scripts\python.exe webcam.py --source foto.jpg        # imagen
 .\.venv\Scripts\python.exe webcam.py --source foto.jpg --no-show   # sin ventana, guarda en resultados\capturas
 ```
 
-Teclas: `q`/ESC salir · `+`/`-` umbral ±0.05 · `1`/`2`/`3` umbral 0.25/0.35/0.50 · `s` guardar captura.
+La ventana tiene un panel de estado (en vivo o en pausa, baches visibles, umbral, FPS) y una barra de botones que se usan con el mouse o con el teclado:
+
+| Botón | Tecla | Qué hace |
+|---|---|---|
+| 0,25 · 0,35 · 0,50 | `1` `2` `3` | Umbral de confianza (cambia al instante, sin volver a pasar el modelo) |
+| − · + | `-` `+` | Umbral ±0,05 |
+| Pausa / Seguir | espacio | Congela el cuadro para mirarlo |
+| Captura | `s` | Guarda la imagen anotada en `resultados\capturas` |
+| Cámara | `c` | Pasa a la siguiente cámara conectada |
+| Salir | `q` o ESC | Cierra |
+| (sin botón) | `f` | Pantalla completa |
+
+Dibujar la interfaz cuesta unos 8 ms por cuadro, así que se ven unos 15-17 FPS en esta laptop.
 
 ## Contenido
 
@@ -84,7 +97,7 @@ Teclas: `q`/ESC salir · `+`/`-` umbral ±0.05 · `1`/`2`/`3` umbral 0.25/0.35/0
 | `fugas.py` | Distancia dHash de cada imagen de val/test a su vecino más cercano de train, y duplicados exactos |
 | `test_limpio.py` | Evalúa el test completo, el limpio y el contaminado |
 | `umbrales.py` | Precisión, recall y F1 por umbral de confianza |
-| `webcam.py` | Detección en vivo, sobre video o sobre una imagen |
+| `webcam.py` | Detección en vivo, sobre video o sobre una imagen, con botones en pantalla |
 | `setup_y_correr.bat`, `abrir_camara.bat` | Instalación y atajo a la cámara |
 | `resultados/` | Salidas medidas en JSON: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, y `picklescan.txt` |
 | `docs/articulo_deteccion_baches.docx` | Artículo (12 páginas) en el formato de la Revista 3i, con los resultados de este repo |
