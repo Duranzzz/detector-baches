@@ -4,8 +4,8 @@
 este script mide P y R justo en cada umbral. Una caja predicha es acierto (TP) si su IoU con una caja
 real aun no emparejada es >= 0.5 (emparejado voraz por confianza descendente); si no, es falso positivo.
 Una caja real sin emparejar es falso negativo.
-Uso (dentro del venv):  python umbrales.py [--split test]
-Escribe resultados/umbrales.json.
+Uso (dentro del venv):  python umbrales.py [--split test] [--nms 0.5]
+Escribe resultados/umbrales.json (NMS por defecto, 0.7) o resultados/umbrales_nms050.json (--nms 0.5).
 """
 import argparse
 import json
@@ -28,6 +28,7 @@ EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--split", default="test", choices=["val", "test"])
+ap.add_argument("--nms", type=float, default=0.7, help="IoU del filtro de cajas duplicadas (NMS)")
 args = ap.parse_args()
 
 
@@ -52,13 +53,14 @@ def iou(a, b):
     return inter / np.maximum(area_a + area_b - inter, 1e-9)
 
 
+SALIDA = "umbrales.json" if abs(args.nms - 0.7) < 1e-9 else f"umbrales_nms{int(round(args.nms * 100)):03d}.json"
 files = sorted(p for p in (DATASET / "images" / args.split).iterdir() if p.suffix.lower() in EXT)
 device = 0 if torch.cuda.is_available() else "cpu"
 model = YOLO(str(HERE / "modelo" / "best.pt"))
 print(f"Prediciendo {len(files)} imagenes de {args.split} con conf>={min(UMBRALES)} ...")
 
 preds = []  # por imagen: (boxes xyxy, conf), gt
-for r, p in zip(model.predict(source=[str(f) for f in files], conf=min(UMBRALES), imgsz=640,
+for r, p in zip(model.predict(source=[str(f) for f in files], conf=min(UMBRALES), iou=args.nms, imgsz=640,
                               device=device, batch=16, stream=True, verbose=False), files):
     h, w = r.orig_shape
     gt = leer_gt(DATASET / "labels" / args.split / (p.stem + ".txt"), w, h)
@@ -90,6 +92,6 @@ for u in UMBRALES:
     res[f"{u:.2f}"] = {"TP": tp, "FP": fp, "FN": fn, "precision": prec, "recall": rec, "f1": f1}
     print(f"conf>={u:.2f}  TP={tp:4d} FP={fp:4d} FN={fn:4d}  P={prec:.3f}  R={rec:.3f}  F1={f1:.3f}")
 
-(OUT / "umbrales.json").write_text(json.dumps({"split": args.split, "imagenes": len(files), "cajas_reales": total_gt,
-                                               "iou_min": IOU_MIN, "umbrales": res}, indent=2), encoding="utf-8")
-print(f"Detalle en {OUT / 'umbrales.json'}")
+(OUT / SALIDA).write_text(json.dumps({"split": args.split, "imagenes": len(files), "cajas_reales": total_gt,
+                                               "iou_min": IOU_MIN, "nms_iou": args.nms, "umbrales": res}, indent=2), encoding="utf-8")
+print(f"Detalle en {OUT / SALIDA}")

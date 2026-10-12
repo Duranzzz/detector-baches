@@ -33,6 +33,14 @@ Equipo: Intel Core i7-1355U, 7.7 GB de RAM, Python 3.14.7, ultralytics 8.4.171, 
 | 0.65 | 0.936 | 0.336 | 0.494 |
 
   0.35 da el mejor F1; 0.50 reduce las falsas alarmas a costa de perder casi la mitad de los baches.
+- **Filtro de cajas duplicadas (NMS) al 50 %, sin reentrenar:** YOLO borra una caja que se solapa con otra más confiable por encima de cierto IoU (0,7 por defecto). Con 0,5, elegido en validación y confirmado en prueba (`nms.py`):
+
+| | Validación mAP50 | Prueba mAP50 | Falsas alarmas en prueba (conf ≥ 0,35) | Precisión / recall (conf ≥ 0,35) |
+|---|---|---|---|---|
+| NMS 0,7 (por defecto) | 0,730 | 0,711 | 207 | 0,738 / 0,587 |
+| **NMS 0,5 (adoptado en `webcam.py`)** | **0,751** | **0,739** | **145** | **0,800 / 0,585** |
+
+  El mAP50-95 casi no cambia (0,394 → 0,390 en prueba): el ajuste quita cajas repetidas, no mejora la forma de las que quedan. La tabla de umbrales con NMS 0,5 está en `resultados/umbrales_nms050.json`.
 - **Seguridad de los pesos:** `picklescan` no encontró nada malicioso en `best.pt` (0 archivos infectados, 0 globals peligrosos; de `__builtin__` solo pide `set`). Es una revisión heurística, ver `resultados/picklescan.txt`.
 
 Detalle en [`resultados/`](resultados/) y en el artículo [`docs/articulo_deteccion_baches.docx`](docs/articulo_deteccion_baches.docx), que todavía tiene un campo marcado en rojo por completar: la fecha de envío.
@@ -58,7 +66,8 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe verify.py          # SHA-256 de los pesos + métricas en val y test -> resultados\metricas.json
 .\.venv\Scripts\python.exe fugas.py           # casi-duplicados train -> val/test
 .\.venv\Scripts\python.exe test_limpio.py     # test completo vs limpio vs contaminado
-.\.venv\Scripts\python.exe umbrales.py        # precisión/recall por umbral de confianza
+.\.venv\Scripts\python.exe umbrales.py        # precisión/recall por umbral de confianza (--nms 0.5 para el filtro adoptado)
+.\.venv\Scripts\python.exe nms.py             # compara el filtro de duplicados 0,7 vs 0,5 en val y test
 ```
 
 (`verify.py` espera el dataset en `repo\dataset`; lo descarga `setup_y_correr.bat`.)
@@ -71,6 +80,8 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe webcam.py --source video.mp4       # video
 .\.venv\Scripts\python.exe webcam.py --source foto.jpg        # imagen
 .\.venv\Scripts\python.exe webcam.py --source foto.jpg --no-show   # sin ventana, guarda en resultados\capturas
+.\.venv\Scripts\python.exe webcam.py --source video.mp4 --no-show  # procesa un video entero -> video_anotado.mp4
+.\.venv\Scripts\python.exe webcam.py --guardar demo.mp4             # en vivo, y además graba lo que se ve
 ```
 
 La ventana tiene un panel de estado (en vivo o en pausa, baches visibles, umbral, FPS) y una barra de botones que se usan con el mouse o con el teclado:
@@ -97,10 +108,12 @@ Dibujar la interfaz cuesta unos 8 ms por cuadro, así que se ven unos 15-17 FPS 
 | `fugas.py` | Distancia dHash de cada imagen de val/test a su vecino más cercano de train, y duplicados exactos |
 | `test_limpio.py` | Evalúa el test completo, el limpio y el contaminado |
 | `umbrales.py` | Precisión, recall y F1 por umbral de confianza |
+| `nms.py` | Compara el filtro de cajas duplicadas 0,7 (por defecto) contra 0,5 (adoptado) |
 | `webcam.py` | Detección en vivo, sobre video o sobre una imagen, con botones en pantalla |
 | `setup_y_correr.bat`, `abrir_camara.bat` | Instalación y atajo a la cámara |
 | `resultados/` | Salidas medidas en JSON: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, y `picklescan.txt` |
 | `docs/articulo_deteccion_baches.docx` | Artículo (12 páginas) en el formato de la Revista 3i, con los resultados de este repo |
+| `docs/presentacion.html` | Presentación (15 diapositivas, animada). Funciona sola: se abre en el navegador, sin instalar nada |
 | `docs/datos_graficas.xlsx` | Datos de las tablas y gráfico editable de la figura 1 (la revista pide las gráficas en un Excel aparte) |
 
 ## Limitaciones (lo que no se verificó o no se puede afirmar)

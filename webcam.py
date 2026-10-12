@@ -5,6 +5,8 @@
   python webcam.py --source video.mp4   # un video
   python webcam.py --source foto.jpg    # una imagen
   python webcam.py --source foto.jpg --no-show   # solo guarda la imagen anotada, sin ventana
+  python webcam.py --source video.mp4 --no-show  # procesa el video entero y guarda video_anotado.mp4
+  python webcam.py --guardar demo.mp4            # en vivo, ademas graba lo que se ve en un .mp4
 
 Botones (clic) o teclas:
   1 / 2 / 3  umbral 0,25 / 0,35 / 0,50     + / -    umbral +-0,05
@@ -28,6 +30,7 @@ from ultralytics import YOLO  # noqa: E402
 HERE = Path(__file__).resolve().parent
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 PRESETS = (0.25, 0.35, 0.50)
+NMS_IOU = 0.5  # filtro de cajas duplicadas: 0.5 en vez de 0.7 sube el mAP50 y quita cajas dobles (ver nms.py)
 CONF_PREDICCION = 0.05  # se predice con un umbral bajo y se filtra al dibujar: cambiar el umbral es instantaneo
 WINDOW = "Detector de baches"
 BARRA = 88  # alto de la barra de botones, en pixeles
@@ -42,7 +45,9 @@ ap.add_argument("--weights", default=str(HERE / "modelo" / "best.pt"))
 ap.add_argument("--conf", type=float, default=0.35, help="umbral de confianza inicial")
 ap.add_argument("--imgsz", type=int, default=640)
 ap.add_argument("--ancho", type=int, default=960, help="ancho de la ventana en pixeles")
-ap.add_argument("--no-show", action="store_true", help="con una imagen: guarda el resultado sin abrir ventana")
+ap.add_argument("--no-show", action="store_true", help="imagen o video: guarda el resultado anotado sin abrir ventana")
+ap.add_argument("--guardar", help="ruta .mp4 donde grabar el video anotado (camara o video)")
+ap.add_argument("--nms", type=float, default=NMS_IOU, help="IoU del filtro de cajas duplicadas")
 ap.add_argument("--ui-png", help="con una imagen: guarda una captura de la interfaz completa en esta ruta y sale")
 args = ap.parse_args()
 
@@ -86,7 +91,7 @@ class App:
 
     # ---------------------------------------------------------------- deteccion
     def detectar(self, frame):
-        r = self.model.predict(frame, conf=min(CONF_PREDICCION, self.conf), imgsz=args.imgsz, verbose=False)[0]
+        r = self.model.predict(frame, conf=min(CONF_PREDICCION, self.conf), iou=args.nms, imgsz=args.imgsz, verbose=False)[0]
         if len(r.boxes):
             self.dets = np.concatenate([r.boxes.xyxy.cpu().numpy(), r.boxes.conf.cpu().numpy()[:, None]], axis=1)
         else:
@@ -133,10 +138,12 @@ class App:
             estado, color = "IMAGEN", AZUL
         elif self.pausa:
             estado, color = "PAUSA", NARANJA
+        elif self.modo == "video":
+            estado, color = "VIDEO", VERDE
         else:
             estado, color = "EN VIVO", VERDE
         partes = [estado, f"baches: {n}", f"umbral ≥ {num(self.conf)}"]
-        if self.modo != "imagen":
+        if self.modo != "imagen" and not args.no_show:
             partes.append(f"{num(self.fps, 1)} FPS")
         t = "   ·   ".join(partes)
         tw = d.textlength(t, font=F_HUD)
@@ -283,6 +290,32 @@ class App:
         self.cap = self.abrir(fuente_)
         if self.cap is None:
             sys.exit(f"No pude abrir la fuente '{fuente_}'. Cierra otras apps que usen la cámara o prueba --source 1")
+        escritor = None
+        if args.guardar or (args.no_show and self.modo == "video"):
+            destino = Path(args.guardar) if args.guardar else Path(fuente_).with_name(Path(fuente_).stem + "_anotado.mp4")
+            fps_fuente = self.cap.get(cv2.CAP_PROP_FPS) or 0
+            fps_salida = fps_fuente if 1 <= fps_fuente <= 120 else 15.0
+        if args.no_show and self.modo == "video":
+            total = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+            n = 0
+            while True:
+                ok, frame = self.cap.read()
+                if not ok:
+                    break
+                self.frame = frame
+                self.detectar(frame)
+                vista, _ = self.componer(con_barra=False)
+                if escritor is None:
+                    escritor = cv2.VideoWriter(str(destino), cv2.VideoWriter_fourcc(*"mp4v"), fps_salida, (vista.shape[1], vista.shape[0]))
+                escritor.write(vista)
+                n += 1
+                if n % 30 == 0:
+                    print(f"  {n}/{total or '?'} cuadros")
+            self.cap.release()
+            if escritor is not None:
+                escritor.release()
+            print(f"Video anotado ({n} cuadros) en {destino}")
+            return
         self.ventana()
         self.botones_listos = False
         t_prev = time.time()
@@ -304,7 +337,16 @@ class App:
                     n += 1
                     if n == 1:
                         t_inicio = ahora  # el primer cuadro incluye el calentamiento del modelo
+            if args.guardar and not self.pausa and self.frame is not None:
+                vista, _ = self.componer(con_barra=False)
+                if escritor is None:
+                    escritor = cv2.VideoWriter(str(destino), cv2.VideoWriter_fourcc(*"mp4v"), fps_salida if self.modo == "video" else 15.0,
+                                               (vista.shape[1], vista.shape[0]))
+                escritor.write(vista)
             self.mostrar(1)
+        if escritor is not None:
+            escritor.release()
+            print(f"Video grabado en {destino}")
         if t_inicio is not None and n > 1:
             print(f"FPS promedio (sin el primer cuadro): {(n - 1) / max(time.time() - t_inicio, 1e-6):.1f} sobre {n - 1} cuadros")
         self.cap.release()
