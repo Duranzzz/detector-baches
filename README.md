@@ -56,7 +56,7 @@ cd detector-baches
 .\abrir_camara.bat          # abre la webcam
 ```
 
-> `setup_y_correr.bat` no se probó de punta a punta como "doble clic": sus pasos se ejecutaron a mano y funcionaron.
+> `setup_y_correr.bat` se probó de punta a punta en esta laptop: instala, verifica (mismas métricas de la tabla) y revisa fugas. Con `setup_y_correr.bat /auto` no pregunta si abrir la webcam.
 
 Pasos a mano, desde esta carpeta:
 
@@ -98,6 +98,27 @@ La ventana tiene un panel de estado (en vivo o en pausa, baches visibles, umbral
 
 Dibujar la interfaz cuesta unos 8 ms por cuadro, así que se ven unos 15-17 FPS en esta laptop.
 
+### Grabar con el celular y procesar en la laptop
+
+El modelo no corre en el celular: el celular solo graba y la laptop procesa después, sin internet.
+
+1. **Grabar.** De día, con el celular en horizontal, a 1080p y 30 fps. En iPhone: Ajustes → Cámara → Formatos → "Más compatible" (H.264); el formato "Alta eficiencia" (HEVC) puede no abrirse en OpenCV. Caminando, a unos 2-5 m de los baches, o desde un auto con el celular sujeto en un soporte y otra persona manejando. Tomas cortas, de 10 a 60 segundos, rinden más que una sola larga.
+2. **Pasar los videos** a la carpeta `videos\` de este proyecto (por cable, Drive o WhatsApp como documento, para que no los comprima).
+3. **Procesar:** doble clic en `procesar_videos.bat`, o arrastrar los videos encima del `.bat`. Por consola:
+
+```powershell
+.\.venv\Scripts\python.exe procesar_videos.py                     # todos los videos de videos\
+.\.venv\Scripts\python.exe procesar_videos.py calle1.mp4 --cada 2   # uno solo, la mitad de los cuadros (el doble de rápido)
+.\.venv\Scripts\python.exe procesar_videos.py --conf 0.5            # menos falsas alarmas, más baches perdidos
+```
+
+4. **Resultados** en `videos\anotados\` (se abre sola al terminar):
+   - `<video>_anotado.mp4`: el video con las cajas dibujadas;
+   - `<video>_anotado_mejor.jpg`: el cuadro con la detección más confiable, útil para el artículo o las diapositivas;
+   - `resumen.csv`: por video, cuadros procesados, cuántos tuvieron baches, porcentaje, confianza máxima y tiempo.
+
+En la prueba con esta laptop se procesaron 30 cuadros en 3 s, contando la carga del modelo (unos 10 por segundo). A ese ritmo, un video de 1 minuto a 30 fps tardaría unos 3 minutos, y la mitad con `--cada 2`; con videos 1080p puede ser algo más lento. La carpeta `videos\` no se sube al repo: pesa y puede mostrar personas o placas.
+
 ## Contenido
 
 | Ruta | Qué es |
@@ -110,6 +131,7 @@ Dibujar la interfaz cuesta unos 8 ms por cuadro, así que se ven unos 15-17 FPS 
 | `umbrales.py` | Precisión, recall y F1 por umbral de confianza |
 | `nms.py` | Compara el filtro de cajas duplicadas 0,7 (por defecto) contra 0,5 (adoptado) |
 | `webcam.py` | Detección en vivo, sobre video o sobre una imagen, con botones en pantalla |
+| `procesar_videos.py`, `procesar_videos.bat` | Procesa en lote los videos grabados con el celular (carpeta `videos/`, no se sube) |
 | `setup_y_correr.bat`, `abrir_camara.bat` | Instalación y atajo a la cámara |
 | `resultados/` | Salidas medidas en JSON: `metricas`, `dataset`, `fugas`, `test_limpio`, `umbrales`, y `picklescan.txt` |
 | `docs/articulo_deteccion_baches.docx` | Artículo (12 páginas) en el formato de la Revista 3i, con los resultados de este repo |

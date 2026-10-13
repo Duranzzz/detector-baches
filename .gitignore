@@ -10,3 +10,6 @@ resultados/capturas/
 resultados/val_*/
 resultados/*.yaml
 resultados/test_*.txt
+
+# videos del celular y sus salidas anotadas (pesados, y pueden mostrar personas o placas)
+videos/

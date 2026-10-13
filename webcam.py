@@ -48,6 +48,7 @@ ap.add_argument("--ancho", type=int, default=960, help="ancho de la ventana en p
 ap.add_argument("--no-show", action="store_true", help="imagen o video: guarda el resultado anotado sin abrir ventana")
 ap.add_argument("--guardar", help="ruta .mp4 donde grabar el video anotado (camara o video)")
 ap.add_argument("--nms", type=float, default=NMS_IOU, help="IoU del filtro de cajas duplicadas")
+ap.add_argument("--cada", type=int, default=1, help="con --no-show y un video: procesa 1 de cada N cuadros (mas rapido)")
 ap.add_argument("--ui-png", help="con una imagen: guarda una captura de la interfaz completa en esta ruta y sale")
 args = ap.parse_args()
 
@@ -297,24 +298,41 @@ class App:
             fps_salida = fps_fuente if 1 <= fps_fuente <= 120 else 15.0
         if args.no_show and self.modo == "video":
             total = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
-            n = 0
+            cada = max(1, args.cada)
+            n = leidos = con_baches = 0
+            mejor_conf, mejor_vista, t_ini = 0.0, None, time.time()
             while True:
                 ok, frame = self.cap.read()
                 if not ok:
                     break
+                leidos += 1
+                if (leidos - 1) % cada:
+                    continue
                 self.frame = frame
                 self.detectar(frame)
+                vis = self.visibles()
                 vista, _ = self.componer(con_barra=False)
+                if len(vis):
+                    con_baches += 1
+                    if vis[:, 4].max() > mejor_conf:
+                        mejor_conf, mejor_vista = float(vis[:, 4].max()), vista
                 if escritor is None:
-                    escritor = cv2.VideoWriter(str(destino), cv2.VideoWriter_fourcc(*"mp4v"), fps_salida, (vista.shape[1], vista.shape[0]))
+                    escritor = cv2.VideoWriter(str(destino), cv2.VideoWriter_fourcc(*"mp4v"), fps_salida / cada,
+                                               (vista.shape[1], vista.shape[0]))
                 escritor.write(vista)
                 n += 1
                 if n % 30 == 0:
-                    print(f"  {n}/{total or '?'} cuadros")
+                    print(f"  {leidos}/{total or '?'} cuadros leidos")
             self.cap.release()
             if escritor is not None:
                 escritor.release()
-            print(f"Video anotado ({n} cuadros) en {destino}")
+            if mejor_vista is not None:
+                cv2.imwrite(str(destino.with_name(destino.stem + "_mejor.jpg")), mejor_vista)
+            seg = time.time() - t_ini
+            print(f"Video anotado en {destino}")
+            print(f"RESUMEN|{Path(fuente_).name}|{n}|{con_baches}|{mejor_conf:.2f}|{seg:.0f}")
+            print(f"  {n} cuadros procesados en {seg:.0f} s; {con_baches} con al menos un bache "
+                  f"({100 * con_baches / max(n, 1):.0f} %); confianza maxima {mejor_conf:.2f}")
             return
         self.ventana()
         self.botones_listos = False
