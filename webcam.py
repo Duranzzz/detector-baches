@@ -49,7 +49,6 @@ ap.add_argument("--no-show", action="store_true", help="imagen o video: guarda e
 ap.add_argument("--guardar", help="ruta .mp4 donde grabar el video anotado (camara o video)")
 ap.add_argument("--nms", type=float, default=NMS_IOU, help="IoU del filtro de cajas duplicadas")
 ap.add_argument("--cada", type=int, default=1, help="con --no-show y un video: procesa 1 de cada N cuadros (mas rapido)")
-ap.add_argument("--ui-png", help="con una imagen: guarda una captura de la interfaz completa en esta ruta y sale")
 args = ap.parse_args()
 
 
@@ -269,10 +268,6 @@ class App:
         if self.frame is None:
             sys.exit(f"No pude leer la imagen '{ruta}'")
         self.detectar(self.frame)
-        if args.ui_png:
-            cv2.imwrite(args.ui_png, self.componer()[0])
-            print("Interfaz guardada en", args.ui_png)
-            return
         if args.no_show:
             vista, _ = self.componer(con_barra=False)
             out = self.snap_dir / f"{Path(ruta).stem}_conf{int(self.conf * 100)}.jpg"
