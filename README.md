@@ -20,12 +20,12 @@ Una detección debe revisarse. El sistema no mide profundidad o gravedad ni asig
 ## Documentación y presentación
 
 - [Artículo del proyecto](docs/articulo_deteccion_baches.docx): funcionamiento, pruebas, dificultades y resultados.
-- [Presentación HTML](docs/presentacion.html): 11 diapositivas animadas, fotografías y mapa de referencia incrustados. Se abre en un navegador sin conexión.
+- [Presentación HTML](docs/presentacion.html): 11 diapositivas animadas, fotografías incrustadas y un mapa vectorial abstracto. Se abre en un navegador sin conexión.
 - [Datos de tablas y gráfico](docs/datos_graficas.xlsx): evaluación inicial y análisis de imágenes repetidas.
 - [Dataset y propuesta de publicación](docs/dataset.md).
 - [Inventario del conjunto de referencia](docs/dataset_manifest.csv): particiones, nombres relativos, huellas y cantidad de anotaciones; no incluye fotografías.
 
-En las diapositivas: flechas o espacio para avanzar y `F` para pantalla completa. En el celular se puede deslizar. No hay barras flotantes de navegación ni paneles de notas. El mapa de referencia de Santa Cruz ilustra una **función futura**, con recorrido y marcadores simulados para la segunda etapa.
+En las diapositivas: flechas o espacio para avanzar y `F` para pantalla completa. En el celular se puede deslizar. No hay barras flotantes de navegación ni paneles de notas. El mapa es un esquema abstracto inspirado en los anillos y el río de Santa Cruz; ilustra una **función futura**, con recorrido y marcadores simulados para la segunda etapa.
 
 ## Cómo ejecutarlo en Windows
 
