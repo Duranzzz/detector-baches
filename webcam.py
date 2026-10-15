@@ -22,11 +22,6 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-import cv2  # noqa: E402
-import numpy as np  # noqa: E402
-from PIL import Image, ImageDraw, ImageFont  # noqa: E402
-from ultralytics import YOLO  # noqa: E402
-
 HERE = Path(__file__).resolve().parent
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 PRESETS = (0.25, 0.35, 0.50)
@@ -51,6 +46,16 @@ ap.add_argument("--nms", type=float, default=NMS_IOU, help="IoU del filtro de ca
 ap.add_argument("--cada", type=int, default=1, help="con --no-show y un video: procesa 1 de cada N cuadros (mas rapido)")
 args = ap.parse_args()
 
+_inicio_librerias = time.perf_counter()
+print("[Inicio] Preparando librerías de imagen...", flush=True)
+import cv2  # noqa: E402
+import numpy as np  # noqa: E402
+from PIL import Image, ImageDraw, ImageFont  # noqa: E402
+
+print("[Inicio] Cargando el motor de detección. Esperá un momento...", flush=True)
+from ultralytics import YOLO  # noqa: E402
+print(f"[Inicio] Librerías listas en {time.perf_counter() - _inicio_librerias:.1f} s.", flush=True)
+
 
 def fuente(tam, negrita=False):
     nombres = (["seguisb.ttf", "arialbd.ttf", "DejaVuSans-Bold.ttf"] if negrita
@@ -73,7 +78,10 @@ def num(x, d=2):
 
 class App:
     def __init__(self):
+        print("[Inicio] Cargando los pesos del detector...", flush=True)
         self.model = YOLO(args.weights)
+        print("[Inicio] Pesos cargados.", flush=True)
+        self.primera_deteccion = True
         self.conf = args.conf
         self.pausa = False
         self.salir = False
@@ -91,7 +99,12 @@ class App:
 
     # ---------------------------------------------------------------- deteccion
     def detectar(self, frame):
+        if self.primera_deteccion:
+            print("[Inicio] Preparando la primera detección. Esta carga puede tardar más...", flush=True)
         r = self.model.predict(frame, conf=min(CONF_PREDICCION, self.conf), iou=args.nms, imgsz=args.imgsz, verbose=False)[0]
+        if self.primera_deteccion:
+            print("[Inicio] Detector listo.", flush=True)
+            self.primera_deteccion = False
         if len(r.boxes):
             self.dets = np.concatenate([r.boxes.xyxy.cpu().numpy(), r.boxes.conf.cpu().numpy()[:, None]], axis=1)
         else:
@@ -264,6 +277,7 @@ class App:
 
     def correr_imagen(self, ruta):
         self.modo = "imagen"
+        print(f"[Inicio] Leyendo la imagen: {ruta}", flush=True)
         self.frame = cv2.imread(str(ruta))
         if self.frame is None:
             sys.exit(f"No pude leer la imagen '{ruta}'")
@@ -283,6 +297,7 @@ class App:
     def correr_video(self, fuente_):
         self.modo = "camara" if isinstance(fuente_, int) else "video"
         self.cam_idx = fuente_ if isinstance(fuente_, int) else 0
+        print(f"[Inicio] Abriendo {'cámara' if self.modo == 'camara' else 'video'}: {fuente_}", flush=True)
         self.cap = self.abrir(fuente_)
         if self.cap is None:
             sys.exit(f"No pude abrir la fuente '{fuente_}'. Cierra otras apps que usen la cámara o prueba --source 1")

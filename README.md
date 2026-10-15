@@ -1,6 +1,6 @@
 # Detección de baches para el mantenimiento vial en Santa Cruz
 
-Prototipo que analiza una cámara, fotografías o videos y señala posibles baches para su revisión. Busca reunir evidencia visual que podría apoyar las inspecciones de calles de la Alcaldía de Santa Cruz de la Sierra.
+Prototipo que analiza una cámara, fotografías o videos y reconoce baches de forma automática. Busca reunir evidencia visual que podría apoyar las inspecciones de calles de la Alcaldía de Santa Cruz de la Sierra.
 
 El desarrollo integra un **detector previamente entrenado por terceros**, una interfaz con controles, procesamiento de videos y evaluaciones propias. La aplicación municipal es una propuesta: todavía no se ha probado en recorridos reales de Santa Cruz ni con personal de la Alcaldía.
 
@@ -15,17 +15,17 @@ Proyecto del primer parcial de Inteligencia Artificial, cuarto semestre de Ingen
 - Video anotado, imagen destacada cuando hay detecciones y resumen por archivo.
 - Ejecución en una laptop sin tarjeta gráfica dedicada.
 
-Una detección debe revisarse. El sistema no mide profundidad o gravedad ni asigna prioridad de reparación. El resumen cuenta cuadros con detecciones, **no baches únicos**.
+La propuesta es que el sistema registre solo las detecciones seguras y que únicamente las dudosas (confianza entre 0,25 y 0,35) pasen a revisión humana; esa derivación todavía no está implementada. El sistema no mide profundidad o gravedad ni asigna prioridad de reparación. El resumen cuenta cuadros con detecciones, **no baches únicos**.
 
 ## Documentación y presentación
 
 - [Artículo del proyecto](docs/articulo_deteccion_baches.docx): funcionamiento, pruebas, dificultades y resultados.
-- [Presentación HTML](docs/presentacion.html): 11 diapositivas animadas, fotografías incrustadas y un mapa vectorial abstracto. Se abre en un navegador sin conexión.
+- [Presentación HTML](docs/presentacion.html): 12 diapositivas animadas para una exposición no técnica, con fotografías incrustadas y un mapa ilustrativo de Santa Cruz. Se abre en un navegador sin conexión.
 - [Datos de tablas y gráfico](docs/datos_graficas.xlsx): evaluación inicial y análisis de imágenes repetidas.
 - [Dataset y propuesta de publicación](docs/dataset.md).
 - [Inventario del conjunto de referencia](docs/dataset_manifest.csv): particiones, nombres relativos, huellas y cantidad de anotaciones; no incluye fotografías.
 
-En las diapositivas: flechas o espacio para avanzar y `F` para pantalla completa. En el celular se puede deslizar. No hay barras flotantes de navegación ni paneles de notas. El mapa es un esquema abstracto inspirado en los anillos y el río de Santa Cruz; ilustra una **función futura**, con recorrido y marcadores simulados para la segunda etapa.
+En las diapositivas: flechas o espacio para avanzar, `F` para pantalla completa y `N` para ver las notas del orador. En el celular se puede deslizar. El mapa es un esquema inspirado en los anillos y el río de Santa Cruz; ilustra una **función futura**, con un recorrido y marcadores simulados.
 
 ## Cómo ejecutarlo en Windows
 
@@ -60,7 +60,7 @@ Después de instalar y descargar los archivos, las entradas y el procesamiento s
 | Salir | `q` / Esc | Cerrar |
 | Pantalla completa | `f` | Cambiar la vista |
 
-### Grabar con el celular y procesar en la laptop
+### Procesar videos grabados con el celular
 
 1. Grabar videos cortos, de día y con el teléfono horizontal. Como punto de partida, usar 1080p y 30 cuadros por segundo. En iPhone, el formato “Más compatible” evita problemas de lectura de algunos videos HEVC.
 2. Copiar los archivos a `videos/`.
@@ -73,7 +73,7 @@ Después de instalar y descargar los archivos, las entradas y el procesamiento s
 .\.venv\Scripts\python.exe procesar_videos.py --conf 0.5
 ```
 
-El celular **graba**; la computadora procesa. `--cada 2` analiza uno de cada dos cuadros y conserva aproximadamente la duración del video de salida. Las grabaciones y sus salidas se excluyen de Git.
+En esta versión los videos se procesan en la computadora; que el celular ejecute el detector por sí solo es parte de la segunda etapa. `--cada 2` analiza uno de cada dos cuadros y conserva aproximadamente la duración del video de salida. Las grabaciones y sus salidas se excluyen de Git.
 
 ## Resultados disponibles
 
@@ -114,8 +114,8 @@ La webcam con la interfaz inicial registró 17,4 cuadros por segundo en 922 cuad
 1. Recolectar imágenes locales, con y sin baches, y registrar aciertos y errores.
 2. Separar los datos por recorrido o escena y realizar un entrenamiento propio documentado.
 3. Evaluar con escenas independientes y conservar los resultados.
-4. Relacionar el tiempo del video con un registro GPS del celular y mostrar ubicaciones aproximadas en un mapa de Santa Cruz.
-5. Agrupar observaciones repetidas y revisar cada registro antes de confirmarlo.
+4. Ejecutar el detector directamente en el celular, sin depender de una computadora.
+5. Guardar la ubicación GPS de cada detección y mostrarla en un mapa de Santa Cruz; agrupar observaciones repetidas y enviar a revisión solo las dudosas.
 
 El mapa de la presentación ilustra esa propuesta. Actualmente no hay captura de GPS, mapa operativo ni mediciones de beneficios municipales.
 
