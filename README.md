@@ -31,8 +31,8 @@ En las diapositivas: flechas o espacio para avanzar, `F` para pantalla completa 
 
 | Carpeta o archivo | Qué contiene |
 |---|---|
-| `abrir_camara.bat`, `procesar_videos.bat`, `setup_y_correr.bat` | Accesos de doble clic: abrir la cámara, procesar videos e instalar |
-| `app/` | El programa: `webcam.py` (cámara en vivo, foto o video) y `procesar_videos.py` (videos en lote) |
+| `abrir_camara.bat`, `abrir_galeria.bat`, `procesar_videos.bat`, `setup_y_correr.bat` | Accesos de doble clic: abrir la cámara, la galería de imágenes de prueba, procesar videos e instalar |
+| `app/` | El programa: `webcam.py` (cámara en vivo, foto o video), `galeria.py` (imágenes de prueba), `procesar_videos.py` (videos en lote) y `muestras/` (fotos externas con licencia libre) |
 | `evaluacion/` | Scripts que miden el detector y generan `resultados/`: métricas, umbrales, filtro de repetidos, datos e imágenes repetidas |
 | `modelo/best.pt` | El detector entrenado |
 | `resultados/` | Cifras medidas en JSON |
@@ -70,6 +70,16 @@ Después de instalar y descargar los archivos, las entradas y el procesamiento s
 | Cámara | `c` | Probar otra cámara conectada |
 | Salir | `q` / Esc | Cerrar |
 | Pantalla completa | `f` | Cambiar la vista |
+
+### Galería de imágenes de prueba
+
+`abrir_galeria.bat` (o `.\.venv\Scripts\python.exe app\galeria.py`) abre una ventana para recorrer, sin cámara:
+
+- las **718 imágenes de prueba** del conjunto de datos, que no se usaron para entrenar, con sus baches marcados a mano en verde y el conteo de cuántos encontró el detector;
+- **5 fotos externas** de Wikimedia Commons (`app/muestras/`: Роман Рябенко y Computerfan0, CC0; Miguel Tremblay, dominio público; Ser Amantio di Nicolao y Thomas Booker, CC BY-SA 4.0);
+- cualquier otra imagen, con **Abrir otra imagen…**.
+
+Recuadros: azul, bache detectado; naranja punteado, dudoso (confianza hasta 0,10 por debajo del umbral); verde punteado, bache real. Teclas: flechas para cambiar de imagen, `1`/`2`/`3` para el umbral, `d` dudosos, `e` baches reales, `r` al azar, `s` guardar captura en `resultados/capturas/`.
 
 ### Procesar videos grabados con el celular
 
