@@ -9,7 +9,7 @@ echo La primera carga puede tardar varios segundos.
 echo Los mensajes de abajo indican el paso actual.
 echo.
 if not exist ".venv\Scripts\python.exe" goto :sin_entorno
-".venv\Scripts\python.exe" -u webcam.py %*
+".venv\Scripts\python.exe" -u app\webcam.py %*
 set "RESULTADO=%ERRORLEVEL%"
 echo.
 if not "%RESULTADO%"=="0" echo [ERROR] El detector termino con un error. Revisa el mensaje de arriba.

@@ -40,11 +40,11 @@ if errorlevel 1 goto :sin_ultralytics
 rem ---- 4) Verificacion ----
 echo.
 echo === Verificando el modelo en val y test ===
-".venv\Scripts\python.exe" verify.py
+".venv\Scripts\python.exe" evaluacion\verify.py
 if errorlevel 1 echo [AVISO] verify.py termino con errores, revisa los mensajes de arriba.
 echo.
 echo === Revisando fugas entre train y test ===
-".venv\Scripts\python.exe" fugas.py
+".venv\Scripts\python.exe" evaluacion\fugas.py
 if errorlevel 1 echo [AVISO] fugas.py termino con errores, revisa los mensajes de arriba.
 echo.
 echo Instalacion terminada.
@@ -53,7 +53,7 @@ echo   - Videos del celular: procesar_videos.bat
 if /i "%~1"=="/auto" goto :fin
 choice /c SN /m "Abrir la webcam ahora"
 if errorlevel 2 goto :fin
-".venv\Scripts\python.exe" webcam.py
+".venv\Scripts\python.exe" app\webcam.py
 :fin
 pause
 exit /b 0

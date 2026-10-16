@@ -1,8 +1,8 @@
 """Procesa los videos grabados con el celular: dibuja las cajas de los baches y guarda un video anotado por cada uno.
 
-  python procesar_videos.py                    # todos los videos de la carpeta videos/
-  python procesar_videos.py clip1.mp4 clip2.mov  # solo esos
-  python procesar_videos.py --cada 2           # 1 de cada 2 cuadros: el doble de rapido
+  python app/procesar_videos.py                    # todos los videos de la carpeta videos/
+  python app/procesar_videos.py clip1.mp4 clip2.mov  # solo esos
+  python app/procesar_videos.py --cada 2           # 1 de cada 2 cuadros: el doble de rapido
 
 Salida en videos/anotados/: <nombre>_anotado.mp4, <nombre>_anotado_mejor.jpg (el cuadro con la deteccion
 mas confiable) y resumen.csv. Funciona sin internet; usa webcam.py con el filtro de duplicados al 50 %.
@@ -16,7 +16,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 VIDEOS = HERE / "videos"
 SALIDA = VIDEOS / "anotados"
 EXT = {".mp4", ".mov", ".avi", ".mkv", ".3gp", ".m4v", ".webm"}
@@ -40,7 +40,7 @@ for i, v in enumerate(lista, 1):
         continue
     destino = SALIDA / (v.stem + "_anotado.mp4")
     print(f"\n[{i}/{len(lista)}] {v.name} -> {destino.name}")
-    r = subprocess.run([sys.executable, str(HERE / "webcam.py"), "--source", str(v), "--no-show", "--guardar", str(destino),
+    r = subprocess.run([sys.executable, str(HERE / "app" / "webcam.py"), "--source", str(v), "--no-show", "--guardar", str(destino),
                         "--conf", str(args.conf), "--cada", str(args.cada)], capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
     resumen = [l for l in r.stdout.splitlines() if l.startswith("RESUMEN|")]

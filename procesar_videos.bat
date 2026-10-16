@@ -5,7 +5,7 @@ if not exist ".venv\Scripts\python.exe" goto :sin_venv
 echo Detector de baches - procesar videos del celular
 echo Arrastra videos sobre este archivo, o copialos en la carpeta videos y haz doble clic.
 echo.
-".venv\Scripts\python.exe" procesar_videos.py %*
+".venv\Scripts\python.exe" app\procesar_videos.py %*
 echo.
 if exist "videos\anotados" start "" "videos\anotados"
 pause

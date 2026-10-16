@@ -2,7 +2,7 @@
 
 Si el dataset tiene versiones aumentadas de una misma foto repartidas entre train y test,
 el mAP medido en test sale inflado. Usa un hash perceptual dHash de 64 bits.
-Uso (dentro del venv):  python fugas.py
+Uso (dentro del venv):  python evaluacion/fugas.py
 """
 import sys
 from pathlib import Path
@@ -13,7 +13,7 @@ if hasattr(sys.stdout, "reconfigure"):
 import cv2  # noqa: E402
 import numpy as np  # noqa: E402
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 IMGS = HERE / "repo" / "dataset" / "images"
 EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 POP = np.array([bin(i).count("1") for i in range(256)], dtype=np.uint8)

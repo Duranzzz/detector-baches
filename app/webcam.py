@@ -1,12 +1,12 @@
 """Detector de baches en vivo, sobre un video o sobre una imagen, con botones en pantalla.
 
-  python webcam.py                      # webcam 0
-  python webcam.py --source 1           # otra camara (por ejemplo una USB)
-  python webcam.py --source video.mp4   # un video
-  python webcam.py --source foto.jpg    # una imagen
-  python webcam.py --source foto.jpg --no-show   # solo guarda la imagen anotada, sin ventana
-  python webcam.py --source video.mp4 --no-show  # procesa el video entero y guarda video_anotado.mp4
-  python webcam.py --guardar demo.mp4            # en vivo, ademas graba lo que se ve en un .mp4
+  python app/webcam.py                      # webcam 0
+  python app/webcam.py --source 1           # otra camara (por ejemplo una USB)
+  python app/webcam.py --source video.mp4   # un video
+  python app/webcam.py --source foto.jpg    # una imagen
+  python app/webcam.py --source foto.jpg --no-show   # solo guarda la imagen anotada, sin ventana
+  python app/webcam.py --source video.mp4 --no-show  # procesa el video entero y guarda video_anotado.mp4
+  python app/webcam.py --guardar demo.mp4            # en vivo, ademas graba lo que se ve en un .mp4
 
 Botones (clic) o teclas:
   1 / 2 / 3  umbral 0,25 / 0,35 / 0,50     + / -    umbral +-0,05
@@ -22,10 +22,10 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 PRESETS = (0.25, 0.35, 0.50)
-NMS_IOU = 0.5  # filtro de cajas duplicadas: 0.5 en vez de 0.7 sube el mAP50 y quita cajas dobles (ver nms.py)
+NMS_IOU = 0.5  # filtro de cajas duplicadas: 0.5 en vez de 0.7 sube el mAP50 y quita cajas dobles (ver evaluacion/nms.py)
 CONF_PREDICCION = 0.05  # se predice con un umbral bajo y se filtra al dibujar: cambiar el umbral es instantaneo
 WINDOW = "Detector de baches"
 BARRA = 88  # alto de la barra de botones, en pixeles

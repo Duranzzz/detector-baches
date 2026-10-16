@@ -4,7 +4,7 @@
 este script mide P y R justo en cada umbral. Una caja predicha es acierto (TP) si su IoU con una caja
 real aun no emparejada es >= 0.5 (emparejado voraz por confianza descendente); si no, es falso positivo.
 Una caja real sin emparejar es falso negativo.
-Uso (dentro del venv):  python umbrales.py [--split test] [--nms 0.5]
+Uso (dentro del venv):  python evaluacion/umbrales.py [--split test] [--nms 0.5]
 Escribe resultados/umbrales.json (NMS por defecto, 0.7) o resultados/umbrales_nms050.json (--nms 0.5).
 """
 import argparse
@@ -19,7 +19,7 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 from ultralytics import YOLO  # noqa: E402
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 DATASET = HERE / "repo" / "dataset"
 OUT = HERE / "resultados"
 UMBRALES = [0.10, 0.25, 0.35, 0.50, 0.65]

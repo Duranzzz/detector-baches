@@ -1,7 +1,7 @@
 """Audita el formato del dataset: conteos por split, etiquetas mal formadas, cajas fuera de rango,
 imagenes sin etiqueta, etiquetas sin imagen y archivos de etiqueta vacios.
 
-Uso (dentro del venv):  python auditar_dataset.py
+Uso (dentro del venv):  python evaluacion/auditar_dataset.py
 Escribe resultados/dataset.json.
 """
 import collections
@@ -14,7 +14,7 @@ import cv2
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 DS = HERE / "repo" / "dataset"
 EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 if not (DS / "images").exists():

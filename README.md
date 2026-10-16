@@ -27,6 +27,17 @@ La propuesta es que el sistema registre solo las detecciones seguras y que únic
 
 En las diapositivas: flechas o espacio para avanzar, `F` para pantalla completa y `N` para ver las notas del orador. En el celular se puede deslizar. El mapa es un esquema inspirado en los anillos y el río de Santa Cruz; ilustra una **función futura**, con un recorrido y marcadores simulados.
 
+## Estructura
+
+| Carpeta o archivo | Qué contiene |
+|---|---|
+| `abrir_camara.bat`, `procesar_videos.bat`, `setup_y_correr.bat` | Accesos de doble clic: abrir la cámara, procesar videos e instalar |
+| `app/` | El programa: `webcam.py` (cámara en vivo, foto o video) y `procesar_videos.py` (videos en lote) |
+| `evaluacion/` | Scripts que miden el detector y generan `resultados/`: métricas, umbrales, filtro de repetidos, datos e imágenes repetidas |
+| `modelo/best.pt` | El detector entrenado |
+| `resultados/` | Cifras medidas en JSON |
+| `docs/` | Artículo, presentación, datos de las gráficas e inventario del conjunto de datos |
+
 ## Cómo ejecutarlo en Windows
 
 Se necesita Python 3.10 o superior, internet para instalar y aproximadamente 2 GB libres. Las pruebas existentes se realizaron con Python 3.14.7. El instalador descarga el conjunto de referencia y prepara un entorno local.
@@ -43,11 +54,11 @@ Después de instalar y descargar los archivos, las entradas y el procesamiento s
 ### Cámara e imágenes
 
 ```powershell
-.\.venv\Scripts\python.exe webcam.py                         # cámara de la laptop
-.\.venv\Scripts\python.exe webcam.py --source 1              # otra cámara
-.\.venv\Scripts\python.exe webcam.py --source foto.jpg       # fotografía
-.\.venv\Scripts\python.exe webcam.py --source video.mp4      # video con ventana
-.\.venv\Scripts\python.exe webcam.py --guardar demo.mp4      # cámara y grabación
+.\.venv\Scripts\python.exe app\webcam.py                         # cámara de la laptop
+.\.venv\Scripts\python.exe app\webcam.py --source 1              # otra cámara
+.\.venv\Scripts\python.exe app\webcam.py --source foto.jpg       # fotografía
+.\.venv\Scripts\python.exe app\webcam.py --source video.mp4      # video con ventana
+.\.venv\Scripts\python.exe app\webcam.py --guardar demo.mp4      # cámara y grabación
 ```
 
 | Control | Tecla | Acción |
@@ -68,9 +79,9 @@ Después de instalar y descargar los archivos, las entradas y el procesamiento s
 4. Revisar `videos/anotados/`: video anotado, imagen destacada si hubo detecciones y `resumen.csv`.
 
 ```powershell
-.\.venv\Scripts\python.exe procesar_videos.py
-.\.venv\Scripts\python.exe procesar_videos.py calle.mp4 --cada 2
-.\.venv\Scripts\python.exe procesar_videos.py --conf 0.5
+.\.venv\Scripts\python.exe app\procesar_videos.py
+.\.venv\Scripts\python.exe app\procesar_videos.py calle.mp4 --cada 2
+.\.venv\Scripts\python.exe app\procesar_videos.py --conf 0.5
 ```
 
 En esta versión los videos se procesan en la computadora; que el celular ejecute el detector por sí solo es parte de la segunda etapa. `--cada 2` analiza uno de cada dos cuadros y conserva aproximadamente la duración del video de salida. Las grabaciones y sus salidas se excluyen de Git.
@@ -122,16 +133,16 @@ El mapa de la presentación ilustra esa propuesta. Actualmente no hay captura de
 ## Reproducir las pruebas
 
 ```powershell
-.\.venv\Scripts\python.exe verify.py
-.\.venv\Scripts\python.exe auditar_dataset.py
-.\.venv\Scripts\python.exe fugas.py
-.\.venv\Scripts\python.exe test_limpio.py
-.\.venv\Scripts\python.exe umbrales.py
-.\.venv\Scripts\python.exe umbrales.py --nms 0.5
-.\.venv\Scripts\python.exe nms.py
+.\.venv\Scripts\python.exe evaluacion\verify.py
+.\.venv\Scripts\python.exe evaluacion\auditar_dataset.py
+.\.venv\Scripts\python.exe evaluacion\fugas.py
+.\.venv\Scripts\python.exe evaluacion\test_limpio.py
+.\.venv\Scripts\python.exe evaluacion\umbrales.py
+.\.venv\Scripts\python.exe evaluacion\umbrales.py --nms 0.5
+.\.venv\Scripts\python.exe evaluacion\nms.py
 ```
 
-Estos comandos regeneran resultados. `nms.py` requiere ejecutar primero `verify.py`. El código fija la versión del repositorio de datos, pero el instalador no fija las versiones de las dependencias: una nueva instalación podría producir diferencias. Las versiones de la evaluación conservada están en `resultados/metricas.json`.
+Estos comandos regeneran resultados. `evaluacion/nms.py` requiere ejecutar primero `evaluacion/verify.py`. El código fija la versión del repositorio de datos, pero el instalador no fija las versiones de las dependencias: una nueva instalación podría producir diferencias. Las versiones de la evaluación conservada están en `resultados/metricas.json`.
 
 ## Fuentes y licencias
 

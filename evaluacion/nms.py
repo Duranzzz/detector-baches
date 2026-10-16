@@ -1,7 +1,7 @@
 """Compara el filtro de cajas duplicadas (NMS) por defecto, IoU 0.7, con el adoptado, IoU 0.5, en val y test.
 
 El IoU se eligio mirando validacion y se confirma en prueba. No reentrena nada.
-Uso (dentro del venv):  python nms.py      -> resultados/nms.json
+Uso (dentro del venv):  python evaluacion/nms.py      -> resultados/nms.json
 """
 import json
 import sys
@@ -13,11 +13,11 @@ if hasattr(sys.stdout, "reconfigure"):
 import torch  # noqa: E402
 from ultralytics import YOLO  # noqa: E402
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 OUT = HERE / "resultados"
 DATA = OUT / "data_abs.yaml"  # lo escribe verify.py
 if not DATA.exists():
-    sys.exit("Falta resultados/data_abs.yaml: corre antes verify.py")
+    sys.exit("Falta resultados/data_abs.yaml: corre antes evaluacion/verify.py")
 
 device = 0 if torch.cuda.is_available() else "cpu"
 model = YOLO(str(HERE / "modelo" / "best.pt"))

@@ -1,6 +1,6 @@
 """Verifica el modelo: integridad de los pesos, metricas en val/test y ejemplos anotados.
 
-Uso (dentro del venv):  python verify.py
+Uso (dentro del venv):  python evaluacion/verify.py
 Escribe todo en resultados/ (metricas.json, ejemplos/).
 """
 import hashlib
@@ -12,7 +12,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 REPO = HERE / "repo"
 WEIGHTS = HERE / "modelo" / "best.pt"
 OUT = HERE / "resultados"

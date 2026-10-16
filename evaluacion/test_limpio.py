@@ -2,7 +2,7 @@
 
 Casi-duplicado = distancia dHash de 64 bits <= 8 respecto a alguna imagen de train (mismo criterio que fugas.py).
 No reentrena nada. Escribe resultados/test_limpio.json.
-Uso (dentro del venv):  python test_limpio.py
+Uso (dentro del venv):  python evaluacion/test_limpio.py
 """
 import json
 import sys
@@ -16,7 +16,7 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 from ultralytics import YOLO  # noqa: E402
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(__file__).resolve().parent.parent  # raiz del proyecto
 DATASET = HERE / "repo" / "dataset"
 IMGS = DATASET / "images"
 OUT = HERE / "resultados"
